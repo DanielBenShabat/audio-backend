@@ -1,3 +1,6 @@
+app.get('/', (req, res) => {
+  res.send('Audio upload backend is running.');
+});
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
