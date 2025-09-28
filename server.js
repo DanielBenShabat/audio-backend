@@ -1,6 +1,3 @@
-app.get('/', (req, res) => {
-  res.send('Audio upload backend is running.');
-});
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -18,6 +15,10 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
+
+app.get('/', (req, res) => {
+  res.send('Audio upload backend is running.');
+});
 
 app.post('/upload', upload.single('audio'), (req, res) => {
   res.json({ message: 'File uploaded successfully', file: req.file });
