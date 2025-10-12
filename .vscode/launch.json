@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Audio Backend",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.ts",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.json",
+        "PORT": "5001"
+      },
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
