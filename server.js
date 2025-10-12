@@ -15,6 +15,7 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
+const PORT = process.env.PORT || 5001;
 
 app.get('/', (req, res) => {
   res.send('Audio upload backend is running.');
@@ -24,6 +25,6 @@ app.post('/upload', upload.single('audio'), (req, res) => {
   res.json({ message: 'File uploaded successfully', file: req.file });
 });
 
-app.listen(5000, () => {
-  console.log('Server started on http://localhost:5000');
+app.listen(PORT, () => {
+  console.log(`Server started on http://localhost:${PORT}`);
 });
