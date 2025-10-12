@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-http://localhost:5000
+http://localhost:5001
 ```
 
 ## GET /
@@ -20,7 +20,7 @@ http://localhost:5000
   - Body field: `audio` (`.mp3`, `.wav`, etc.)
 - **Sample**
   ```bash
-  curl -X POST http://localhost:5000/upload \
+  curl -X POST http://localhost:5001/upload \
     -F "audio=@/path/to/file.wav"
   ```
 - **Success Response**
@@ -41,4 +41,4 @@ http://localhost:5000
   ```
 - **Notes**
   - Files persist to `uploads/` using timestamp-prefixed filenames.
-  - Adjust storage logic in `server.js` if you need S3 or cloud storage.
+  - Adjust storage logic in `src/service/storageService.ts` if you need S3 or cloud storage.

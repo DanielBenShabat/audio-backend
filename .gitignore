@@ -9,6 +9,7 @@ uploads/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+dist/
 
 # OS and editor detritus
 .DS_Store

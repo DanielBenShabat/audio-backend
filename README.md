@@ -9,9 +9,9 @@ Simple Express server that accepts audio uploads from a frontend client and stor
 ## Getting Started
 ```bash
 npm install
-node server.js
+npx ts-node server.ts
 ```
-`server.js` starts on port `5001` (configurable via `PORT`) and uploads land in `uploads/`.
+`server.ts` starts on port `5001` (configurable via `PORT`) and uploads land in `uploads/`.
 
 ## Available Routes
 - `GET /` – health check
@@ -21,17 +21,19 @@ Detailed request/response examples live in `docs/api.md`.
 
 ## Project Layout
 ```
-server.js             Entry point
-src/app.js            Express app factory
+server.ts             Entry point
+src/app.ts            Express app factory
 src/controller/       Route handlers
 src/routers/          Express routers
 src/service/          Upload/storage services
 uploads/              Saved audio files (git ignored)
-package.json          Dependencies
+Trash/                Archived JS sources
+package.json          Dependencies & scripts
 ```
 
 ## Development Tips
-- Adjust destination directory in `server.js` if you need custom storage.
+- Adjust destination directory in `src/service/storageService.ts` if you need custom storage.
 - Watch console output for generated filenames during manual testing.
 - Ensure the target directory exists (`uploads/` is created on first write).
 - CORS is open to all origins via `app.use(cors())`; tighten before deploying.
+- To build JavaScript output for deployment run `npx tsc` (emits to `dist/`).
