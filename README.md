@@ -11,7 +11,7 @@ Simple Express server that accepts audio uploads from a frontend client and stor
 npm install
 node server.js
 ```
-`server.js` starts on port `5000` and uploads land in `uploads/`.
+`server.js` starts on port `5001` (configurable via `PORT`) and uploads land in `uploads/`.
 
 ## Available Routes
 - `GET /` – health check
@@ -21,9 +21,13 @@ Detailed request/response examples live in `docs/api.md`.
 
 ## Project Layout
 ```
-server.js        Core Express app
-uploads/         Saved audio files (git ignored)
-package.json     Dependencies
+server.js             Entry point
+src/app.js            Express app factory
+src/controller/       Route handlers
+src/routers/          Express routers
+src/service/          Upload/storage services
+uploads/              Saved audio files (git ignored)
+package.json          Dependencies
 ```
 
 ## Development Tips
