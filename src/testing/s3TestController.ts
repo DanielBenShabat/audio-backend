@@ -12,13 +12,20 @@ export const handleS3Test = async (req: Request, res: Response): Promise<void> =
     console.log('S3 client config:', {
       endpoint: process.env.SONG_BUCKET_ENDPOINT,
       region: process.env.SONG_BUCKET_REGION,
-      hasCredentials: !!(process.env.SONG_BUCKET_KEY && process.env.SONG_BUCKET_SECRET)
+      hasCredentials: !!(process.env.SONG_BUCKET_KEY && process.env.SONG_BUCKET_SECRET),
+      accessKey: process.env.SONG_BUCKET_KEY?.substring(0, 8) + '...',
+      secretKey: process.env.SONG_BUCKET_SECRET?.substring(0, 8) + '...'
     });
 
     // Test basic S3 connection by listing objects
     const command = new ListObjectsV2Command({
       Bucket: BUCKET_NAME,
       MaxKeys: 1
+    });
+
+    console.log('Attempting ListObjectsV2 with command:', {
+      bucket: BUCKET_NAME,
+      maxKeys: 1
     });
 
     const response = await s3Client.send(command);
@@ -35,10 +42,11 @@ export const handleS3Test = async (req: Request, res: Response): Promise<void> =
 
   } catch (error) {
     console.error('S3 test error:', error);
+    const errorObj = error as Error;
     res.status(500).json({
       success: false,
-      error: error.name || 'UnknownError',
-      message: error.message,
+      error: errorObj.name || 'UnknownError',
+      message: errorObj.message,
       bucket: BUCKET_NAME
     });
   }
