@@ -1,29 +1,20 @@
-import fs from 'fs';
-import path from 'path';
 import multer from 'multer';
-import { Request } from 'express';
+import multerS3 from 'multer-s3';
+import s3Client, { BUCKET_NAME } from '../config/s3Config';
 
 /**
- * Ensures the uploads directory exists before writing files.
+ * Multer S3 storage configuration for DigitalOcean Spaces
  */
-const resolveUploadsDir = (): string => {
-  const uploadsPath = path.join(__dirname, '..', '..', 'uploads');
-  if (!fs.existsSync(uploadsPath)) {
-    fs.mkdirSync(uploadsPath, { recursive: true });
-  }
-  return uploadsPath;
-};
-
-const storage = multer.diskStorage({
-  destination: (_req: Request, _file, cb) => {
-    cb(null, resolveUploadsDir());
-  },
-  filename: (_req: Request, file, cb) => {
+const storage = multerS3({
+  s3: s3Client,
+  bucket: BUCKET_NAME,
+  acl: 'private',
+  key: (_req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
 /**
- * Multer middleware that stores a single audio file under the `audio` field.
+ * Multer middleware that uploads a single audio file directly to DigitalOcean Spaces.
  */
 export const uploadSingleAudio = multer({ storage }).single('audio');
