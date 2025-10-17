@@ -1,6 +1,7 @@
-import { GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import s3Client, { BUCKET_NAME } from '../config/s3Config';
+import { getRandomSong, getAllSongs, getSongById, SongRecord } from './databaseService';
 
 /**
  * Generates a presigned URL for accessing a private file in DigitalOcean Spaces
@@ -49,45 +50,70 @@ export const validateFileExists = async (fileKey: string): Promise<boolean> => {
 };
 
 /**
- * Lists all objects in the bucket and returns 3 random ones
- * @param count - Number of random songs to return (default: 3)
- * @returns Promise<Array<{key: string, size: number, lastModified: Date}>> - Array of random song objects
+ * Gets a single random song from the database with presigned URL
+ * @returns Promise<SongRecord & {presignedUrl: string} | null> - Random song with presigned URL
  */
-export const getRandomSongs = async (count: number = 3): Promise<Array<{key: string, size: number, lastModified: Date}>> => {
+export const getRandomSongWithUrl = async (): Promise<(SongRecord & {presignedUrl: string}) | null> => {
   try {
-    const command = new ListObjectsV2Command({
-      Bucket: BUCKET_NAME,
-      MaxKeys: 1000, // Get up to 1000 objects to have a good selection for randomization
-    });
-
-    const response = await s3Client.send(command);
-    
-    if (!response.Contents || response.Contents.length === 0) {
-      return [];
+    const song = await getRandomSong();
+    if (!song) {
+      return null;
     }
 
-    // Filter out any non-audio files (optional, based on file extensions)
-    const audioFiles = response.Contents.filter(obj => {
-      const key = obj.Key || '';
-      return key.match(/\.(mp3|wav|flac|m4a|aac|ogg)$/i);
-    });
-
-    if (audioFiles.length === 0) {
-      return [];
-    }
-
-    // Shuffle the array and take the requested number
-    const shuffled = audioFiles.sort(() => 0.5 - Math.random());
-    const selectedCount = Math.min(count, shuffled.length);
-    
-    return shuffled.slice(0, selectedCount).map(obj => ({
-      key: obj.Key!,
-      size: obj.Size || 0,
-      lastModified: obj.LastModified || new Date(),
-    }));
-
+    const presignedUrl = await generatePresignedUrl(song.s3_key);
+    return {
+      ...song,
+      presignedUrl
+    };
   } catch (error) {
-    console.error('Error listing random songs:', error);
-    throw new Error('Failed to retrieve random songs from bucket');
+    console.error('Error getting random song:', error);
+    throw new Error('Failed to retrieve random song');
   }
 };
+
+/**
+ * Gets all songs from the database with presigned URLs
+ * @returns Promise<Array<SongRecord & {presignedUrl: string}>> - All songs with presigned URLs
+ */
+export const getAllSongsWithUrls = async (): Promise<Array<SongRecord & {presignedUrl: string}>> => {
+  try {
+    const songs = await getAllSongs();
+    const songsWithUrls = await Promise.all(
+      songs.map(async (song) => {
+        const presignedUrl = await generatePresignedUrl(song.s3_key);
+        return {
+          ...song,
+          presignedUrl
+        };
+      })
+    );
+    return songsWithUrls;
+  } catch (error) {
+    console.error('Error getting all songs:', error);
+    throw new Error('Failed to retrieve songs');
+  }
+};
+
+/**
+ * Gets a song by its database ID with presigned URL
+ * @param songId - The UUID of the song to retrieve
+ * @returns Promise<SongRecord & {presignedUrl: string} | null> - Song with presigned URL or null
+ */
+export const getSongByIdWithUrl = async (songId: string): Promise<(SongRecord & {presignedUrl: string}) | null> => {
+  try {
+    const song = await getSongById(songId);
+    if (!song) {
+      return null;
+    }
+
+    const presignedUrl = await generatePresignedUrl(song.s3_key);
+    return {
+      ...song,
+      presignedUrl
+    };
+  } catch (error) {
+    console.error('Error getting song by ID:', error);
+    throw new Error('Failed to retrieve song');
+  }
+};
+

@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { handleFileRetrieval, handleRandomSongs } from '../controller/retrievalController';
+import { handleFileRetrieval, handleRandomSongs, handleAllSongs, handleSongById, handleProxyDownload, handleDeleteSong } from '../controller/retrievalController';
+import { requireAdmin } from '../middleware/authMiddleware';
 
 /**
  * File retrieval routes for accessing files via presigned URLs
@@ -19,13 +20,47 @@ router.get('/retrieve/:fileKey', handleFileRetrieval);
 
 /**
  * GET /random
- * Lists random songs from the bucket
+ * Gets a single random song with full metadata and presigned URL
+ * Requires admin authentication (placeholder for now)
  * 
- * Query parameters:
- * - count: Number of random songs to return (default: 3, max: 10)
- * 
- * Example: GET /files/random?count=5
+ * Example: GET /files/random
  */
-router.get('/random', handleRandomSongs);
+router.get('/random', requireAdmin, handleRandomSongs);
+
+/**
+ * GET /all
+ * Lists all songs with metadata and presigned URLs
+ * Public endpoint - no authentication required
+ * 
+ * Example: GET /files/all
+ */
+router.get('/all', handleAllSongs);
+
+/**
+ * GET /song/:songId
+ * Downloads a specific song by its database ID (triggers automatic download)
+ * Public endpoint - no authentication required
+ * 
+ * Example: GET /files/song/123e4567-e89b-12d3-a456-426614174000
+ */
+router.get('/song/:songId', handleSongById);
+
+/**
+ * GET /download/:songId
+ * Downloads a specific song by streaming it through the backend (CORS-safe)
+ * Public endpoint - no authentication required
+ * 
+ * Example: GET /files/download/123e4567-e89b-12d3-a456-426614174000
+ */
+router.get('/download/:songId', handleProxyDownload);
+
+/**
+ * DELETE /song/:songId
+ * Deletes a song by its database ID from both database and S3 bucket
+ * Requires admin authentication
+ * 
+ * Example: DELETE /files/song/123e4567-e89b-12d3-a456-426614174000
+ */
+router.delete('/song/:songId', requireAdmin, handleDeleteSong);
 
 export default router;
